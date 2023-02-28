@@ -1,86 +1,80 @@
 ---
-title: "A3: SPL Library Checkouts"
+title: "A3: Analyzing SPL Library Checkouts for Popular Romance Novels"
 output: html_document
 ---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(stringr)
+
+spl_df <- read.csv("C:\\Users\\dhang\\Desktop\\info201\\2017-2023-10-Checkouts-SPL-Data.csv", stringsAsFactors = FALSE)
+
+spl_df <- spl_df %>% mutate("date" = paste0(CheckoutYear, "-", CheckoutMonth, "-01"))
+
+spl_df$date <- as.Date(spl_df$date, format ="%Y-%m-%d")
+
+filtered_spl_df <- spl_df %>% filter(Creator %in% c("Audrey Niffenegger","André Aciman","John Green","Nicola Yoon")) %>% filter(str_detect(Title, "Your Name|Everything|Our Stars|The Time Traveler's Wife"))
+
+Checkouts_per_year <- filtered_spl_df %>% 
+  group_by(CheckoutYear, Creator) %>%
+  summarize(Total_checkouts = sum(Checkouts)) 
+
+Checkouts_during_20192020 <- filtered_spl_df %>% 
+   filter(CheckoutYear == 2019|2020) %>%
+    group_by(CheckoutMonth, Creator) %>%
+    summarize(Total_checkouts = sum(Checkouts))
+
+Audio_and_ebooks <- filtered_spl_df %>% 
+  group_by(CheckoutYear, MaterialType) %>%
+  summarize(Total_checkouts = sum(Checkouts))
+
+```
 ### Introduction
 
-An introduction of the data and a description of the trends/books/items you are choosing to analyze (and why!)
+The data used in this report came from the Seattle Public Library. It includes the history of items that were checked out at least 10 times from 2017 through 2023. This report will analyze the checkout trends from 4 romance novels that were published during the 21st century including:
+
+* The Time Traveler’s Wife (2003) by Audrey Niffenegger
+* Call me by Your Name (2007) by André Aciman
+* The Fault in Our Stars (2012) by John Green
+* Everything, Everything (2015) by Nicola Yoon
+
+More specifically, since all books analyzed were published before the COVID 19 pandemic this report will seek to understand any differences in the checkout history due to the pandemic as well as understanding what are the most common platforms readers are using (books, ebooks, & audio books). I am interested in these books in particular since I have read them all during the pandemic, I think it would be interesting to compare their popularity.
+
 
 ### Summary Information
 
-Write a summary paragraph of findings that includes the 5 values calculated from your summary information R script
+```{r, echo = FALSE, warning = FALSE, code = readLines("summary.R")}
+```
 
-These will likely be calculated using your DPLYR skills, answering questions such as:
-
-- What is the average number of checkouts for each item?
-- What is the month or year with the most/least checkouts for a book that you're interested in?
-- What is the month or year with the most/least checkouts for ebooks?
-- How has the number of print book checkouts changed over time?
-
-Feel free to calculate and report values that you find relevant.
+During 2017 to 2023 there was a total of **`r sum_info$Total_num_books`** checkouts across all four romance novels. The most popular author was **`r sum_info$Most_popular`**, his book, *Call me by Your Name*, had over **`r sum_info$Popular_book_checkouts`** checkouts. On the other hand, the least popular author was **`r sum_info$Least_popular `**. His book, *The Fault in Our Stars*, only had a total of **`r sum_info$Least_popular_checkouts`** checkouts. The year with greatest number of checkouts for all four novels was **`r sum_info$Max_year`**, and the year with the least number of checkouts was  **`r sum_info$Min_year`**.
 
 ### The Dataset
 
-- Who collected/published the data?  
-- What are the parameters of the data (dates, number of checkouts, kinds of books, etc.)?
-- How was the data collected or generated?  
-- Why was the data collected?  
-- What, if any, ethical questions do you need to consider when working with this data?  
-- What are possible limitations or problems with this data?   (at least 200 words)
+The data was collected by the Seattle Public Library, and can be found on [Seattle Open Data](https://data.seattle.gov/Community/Checkouts-by-Title/tmmm-ytt6). It was generated using a monthly count of checkouts per physical and digital items since April 2005 to February 2023 at the Seattle Public Library. A majority of SPL's books are  offered through digital platforms such as ebooks and audio books. They also offer video disks, movies, and even magazines. The data set has a wide range of genres including biographies, nonfiction, fantasy, romance, mystery, and more. They also have items that are produced in non-English languages.
+
+The data set I am using is a filtered version using items that were checked out at least 10 times during 2017-2023. It denotes whether an item is physical or digital, the checkout method, material type, date, title, author, publisher, and genres. Certain limitations to consider while working with this data is that there often different versions of the item created, which can make it difficult to find all versions of an item. In addition, some author's names and item title's exist in different formats. Since the ISBN for many items are not provided, thus it is difficult to differentiate all forms of the item. In addition, the dataset does not include all data for 2023, thus while analyzing data in 2023, low checkout values are expected from the short time frame.
 
 
-### First Trends Over Time Chart
+### First Trends Over Time: Novel Checkouts per Year
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
-
-The first chart that you will create and include will show the trend over time of your variable/topic/interest. Think carefully about what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
-
-- Show more than one, but fewer than ~10 trends
-  - For example, two books, or 5 different mediums
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear - legend title
-In your .Rmd file, make sure to describe why you included the chart, and what patterns emerged
-
-When we say "clear" or "human readable" titles and labels, that means that you should not just display the variable name.
-
-Here's an example of how to run an R script inside an RMarkdown file:
-
-``````{r, echo = FALSE, warning = FALSE, code = readLines("chart1_example.R")}
+```{r, echo = FALSE, code = readLines("chart1_example.R")}
 ```
 
-### Second Trends Over Time Chart
+This graph display's each authors' total romance novel checkouts per year in 2017-2023. The highest amount of checkout was Andre Aciman's *Call Me by Your Name*. Meanwhile *The Fault in Our Stars* (2012) by John Green, and *the Time Traveler’s Wife* (2003) by Audrey Niffenegger were very similar in having low checkout history. *Everything, Everything* (2015) by Nicola Yoon appeared to have a higher checkout history than Green and Niffenegger, but dropped below them after 2021. All novels showed a moderate decrease in checkouts after 2018.
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
+### Second Trends Over Time: Novel Checkouts per Month During Peak Social Distancing
 
-The second chart that you will create and include will show another trend over time of your variable/topic/interest. Think carefully about what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
-
-- Show more than one, but fewer than ~10 trends
-  - For example, two books, or 5 different mediums
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear - legend title
-In your .Rmd file, make sure to describe why you included the chart, and what patterns emerged
-
-When we say "clear" or "human readable" titles and labels, that means that you should not just display the variable name.
-
-Here's an example of how to run an R script inside an RMarkdown file:
-
-``````{r, echo = FALSE, code = readLines("chart2_example.R")}
+```{r, echo = FALSE, code = readLines("chart2_example.R")}
 ```
 
-### Your Choice
+This graph analyses the trends of the 4 novels when heavy restrictions on COVID policies occurred between 2019-2020. Many businesses, institutions, and schools were closed, virtual, or required strict social distance policies. It is interesting so see that during this time frame, Nicola Yoon had the fewest amounts of checkouts compared to John Green despite being the more recently published novel.
 
-The last chart is up to you. It could be a line plot, scatter plot, histogram, bar plot, stacked bar plot, and more. Here are some requirements to help guide your design:
+### Audio vs Ebook preferences
 
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear legend title
-
-Here's an example of how to run an R script inside an RMarkdown file:
-
-``````{r, echo = FALSE, code = readLines("chart2_example.R")}
+```{r, echo = FALSE, code = readLines("chart3spl.R")}
 ```
 
-
+The chart depicts the total checkout history for Audio vs. Ebook over time using data from the four romance novels. Overall Ebook was the most preferred platform for users, but after late 2021, audio books became increasingly more popular.

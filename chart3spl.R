@@ -1,4 +1,3 @@
-
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
@@ -14,21 +13,19 @@ filtered_spl_df <- spl_df %>%
   filter(Creator %in% c("Audrey Niffenegger", "André Aciman", "John Green", "Nicola Yoon")) %>%
   filter(str_detect(Title, "Your Name|Everything|Our Stars|The Time Traveler's Wife"))
 
-
-Checkouts_per_year <- filtered_spl_df %>% 
-  group_by(CheckoutYear, Creator) %>%
+Audio_and_ebooks <- filtered_spl_df %>% 
+  group_by(CheckoutYear, MaterialType) %>%
   summarize(Total_checkouts = sum(Checkouts))
 
-
-ggplot(data = Checkouts_per_year) +
+ggplot(data = Audio_and_ebooks) +
   geom_point(
-    mapping = aes(x = CheckoutYear, y = Total_checkouts, color = Creator)
+    mapping = aes(x = CheckoutYear, y = Total_checkouts, color = MaterialType)
   ) +
   geom_line(
-    mapping = aes(x = CheckoutYear, y = Total_checkouts, color = Creator)
+    mapping = aes(x = CheckoutYear, y = Total_checkouts, color = MaterialType)
   ) +
-  labs( title = "Author's Novel Checkouts Per Year",
+  labs( title = "Audio vs Ebook Checkouts Per Year",
         subtitle = "2017-2023",
-        caption = "Line graph of each author's romance novel checkouts per year",
+        caption = "Line graph of each material type checkouts per year",
         x = "Year",
         y = "Total Checkouts")
